@@ -9,9 +9,10 @@ class Network:
 		self.port = 5555
 		self.addr = (self.server, self.port)
 		# This is implemented so that each player (client) will have their own id
-		self.id = self.connect()
-		# This should say connected
-		print(self.id)
+		self.pos = self.connect()
+
+	def getPos(self):
+		return self.pos
 
 	def connect(self):
 		try:
@@ -38,6 +39,3 @@ class Network:
 			print(reply)
 		except socket.error as e:
 			print(e)
-
-n = Network()
-print(n.send("Test sending message 1"))
