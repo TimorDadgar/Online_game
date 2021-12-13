@@ -18,6 +18,7 @@ s.listen(2)
 print("waiting for a connection, Server Started")
 
 def threaded_client(conn):
+	conn.send(str.encode("Connected"))
 	reply = ""
 	while True:
 		try:
@@ -33,6 +34,7 @@ def threaded_client(conn):
 				print("Received ", reply)
 				print("Sending ", reply)
 			
+			# Sends message to all sockets
 			conn.sendall(str.encode(reply))
 		except:
 			break
