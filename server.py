@@ -2,8 +2,10 @@ from os import error
 import socket
 from _thread import *
 import sys
+from player import Player
+import pickle
 
-server = "10.33.38.96"
+server = "192.168.43.172"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,33 +17,21 @@ except socket.error as e:
 
 # Backlog parameter (2), specifies how many unaccepted connections are allowed 
 s.listen(2)
+# Implemented so I can get my KeyboardInterrup Ctrl+c through
+s.settimeout(10.0)
 print("waiting for a connection, Server Started")
 
-""" same 2 functions as game_client """
-# Will read a string and convert it into pos x and y
-def read_pos(str):
-	# Split by comma
-	str = str.split(",")
-	return int(str[0]), int(str[1])
-
-# create string of the pos x and y
-def make_pos(tup):
-	return str(tup[0]) + "," + str(tup[1])
-
-# Hold positions of all players
-# player 1 will start at (0,0) etc
-pos = [(0,0), (100,100)]
+# Saving a list of players on serverside, clients can only do commands to update not mess with players
+players = [Player(0,0,50,50,(255,0,0)), Player(100,100,50,50,(0,0,255))]
 
 def threaded_client(conn, player):
-	# First have to make pos[player] into a string and then send it as bytes
-	# print(str.encode(make_pos(pos[player])))
-	conn.send(str.encode(make_pos(pos[player])))
+	conn.send(pickle.dumps(players[player]))
 
 	reply = ""
 	while True:
 		try:
-			data = read_pos(conn.recv(2048).decode())
-			pos[player] = data
+			data = (pickle.loads(conn.recv(2048)))
+			players[player] = data
 			# Try to get information from client but if
 			# we dont get any we disconnect.
 			if not data: 
@@ -50,15 +40,15 @@ def threaded_client(conn, player):
 			else:
 				# Super hard coded when sending info to player 1 about player 2
 				if player == 1:
-					reply = pos[0]
+					reply = players[0]
 				else:
-					reply = pos[1]
+					reply = players[1]
 
 				print("Received ", data)
 				print("Sending ", reply)
 			
 			# Sends message to all sockets
-			conn.sendall(str.encode(make_pos(reply)))
+			conn.sendall(pickle.dumps(reply))
 		except:
 			break
 
@@ -69,11 +59,16 @@ def threaded_client(conn, player):
 # This is passed in new thread function
 currentPlayer = 0
 # Continously looks for connections
-while True:
-	# conn is an object that represents what is connected
-	# addr is an ipv4
-	conn, addr = s.accept()
-	print("Connected to:", addr)
+run = True
+while run:
+	# Implemented so I can get my KeyboardInterrup Ctrl+c through
+	try:
+		# conn is an object that represents what is connected
+		# addr is an ipv4
+		conn, addr = s.accept()
+		print("Connected to:", addr)
 
-	start_new_thread(threaded_client, (conn, currentPlayer))
-	currentPlayer += 1
+		start_new_thread(threaded_client, (conn, currentPlayer))
+		currentPlayer += 1
+	except TimeoutError as e:
+		print("No connections were received, error:", e)
