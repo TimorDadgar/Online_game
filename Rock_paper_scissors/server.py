@@ -3,7 +3,7 @@ from _thread import *
 import pickle
 from game import Game
 
-server = "192.168.43.172"
+server = "192.168.10.168"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -24,11 +24,18 @@ connected = set()
 games = {}
 # Keep track of current Id, no overwritting games etc.
 idCount = 0
+# Keep track of player in battle royale
+player = 0
+play_dict = {}
 
 
-def threaded_client(conn, p, gameId):
+def threaded_client(conn, p, player, gameId):
 	global idCount
+	print("Lmao p: ", p)
+	print("Lmao player: ", str(player))
+
 	conn.send(str.encode(str(p)))
+	conn.send(str.encode(str(player)))
 
 	reply = ""
 	while True:
@@ -71,7 +78,6 @@ while True:
 	print("Connected to:", addr)
 	# Keep track of how many people are connected at once
 	idCount += 1
-	p = 0
 	# // is integer division
 	# How many games do we have, if 7 people we need 4 games
 	gameId = (idCount - 1)//2
@@ -80,9 +86,12 @@ while True:
 		# Filling dict. with games
 		games[gameId] = Game(gameId)
 		print("Creating a new game...")
+		player += 1
+		play_dict[player] = 0
 	# Don't need to create a new game
 	else:
 		games[gameId].ready = True
-		p = 1
+		player += 1
+		play_dict[player] = 1
 
-	start_new_thread(threaded_client, (conn, p, gameId))
+	start_new_thread(threaded_client, (conn, play_dict[player], player, gameId))
