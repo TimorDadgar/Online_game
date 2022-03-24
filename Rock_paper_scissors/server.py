@@ -28,7 +28,8 @@ idCount = 0
 player = 0
 play_dict = {}
 
-
+# p is 0 or 1, a player for each game
+# player is an unique id for the player
 def threaded_client(conn, p, player, gameId):
 	global idCount
 	print("Lmao p: ", p)
@@ -51,6 +52,8 @@ def threaded_client(conn, p, player, gameId):
 					if data == "reset":
 						game.resetWent()
 					elif data != "get":
+						game.play(p, data)
+					elif data != "win":
 						game.play(p, data)
 
 					conn.sendall(pickle.dumps(game))
