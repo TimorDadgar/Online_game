@@ -12,13 +12,13 @@ class Player(pygame.sprite.Sprite):
 		self.direction = pygame.math.Vector2(0,0)
 		self.speed = 8
 		self.gravity = 0.8
-		self.jump_speed = -16
-		self.available_jumps = 1
+		self.jump_speed = -13
+		self.has_collided = True
+		self.can_jump = False
+		self.can_double_jump = False
 		self.delta_jump = 0
-		self.has_collided = False
 
 	def get_input(self):
-		global delta_jump
 		keys = pygame.key.get_pressed()
 
 		if keys[pygame.K_RIGHT]:
@@ -28,17 +28,22 @@ class Player(pygame.sprite.Sprite):
 		else:
 			self.direction.x = 0
 
-		if pygame.time.get_ticks()-self.delta_jump >=300 and keys[pygame.K_UP] and self.available_jumps >= 1:
+		if pygame.time.get_ticks()-self.delta_jump >=300 and keys[pygame.K_UP]:
 			self.delta_jump = pygame.time.get_ticks()
 			self.jump()
-			self.available_jumps -= 1
 
 	def apply_gravity(self):
 		self.direction.y += self.gravity
 		self.rect.y += self.direction.y
 
 	def jump(self):
-		self.direction.y = self.jump_speed
+		if self.can_jump:
+			self.direction.y = self.jump_speed
+			self.can_jump = False
+			self.can_double_jump = True
+		elif self.can_double_jump:
+			self.direction.y = self.jump_speed
+			self.can_double_jump = False
 
 	def update(self):
 		self.get_input()

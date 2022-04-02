@@ -55,23 +55,16 @@ class Level:
 					player.direction.y = 0
 					# Player jump
 					player.delta_jump = 0
-					player.available_jumps = 2
-					player.has_collided = True				
+					player.can_jump = True
+					player.has_collided = True
 				elif player.direction.y < 0:
 					player.rect.top = sprite.rect.bottom
 					player.direction.y = 3
-		print("collision list :", self.collide_list)
-
-			
-
-	def double_jump(self):
-		player = self.player.sprite
 		if not any(self.collide_list) and player.has_collided == True:
-			player.available_jumps = 1
+			print(self.collide_list)
 			player.has_collided = False
-			print(player.available_jumps)
-
-
+			player.can_double_jump = True
+			player.can_jump = False
 
 	def horizontal_movement_collision(self):
 		player = self.player.sprite
@@ -95,5 +88,4 @@ class Level:
 		self.player.update()
 		self.horizontal_movement_collision()
 		self.vertical_movement_collision()
-		self.double_jump()
 		self.player.draw(self.display_surface)
