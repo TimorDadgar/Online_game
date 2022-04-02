@@ -3,6 +3,7 @@ from tiles import Tile
 from settings import tile_size, screen_width
 from player import Player
 
+
 class Level:
 	def __init__(self, level_data, surface):
 		# Level setup
@@ -50,9 +51,12 @@ class Level:
 				if player.direction.y > 0:
 					player.rect.bottom = sprite.rect.top
 					player.direction.y = 0
+					# Player jump
+					player.available_jumps = 2
+					player.delta_jump = 0
 				elif player.direction.y < 0:
 					player.rect.top = sprite.rect.bottom
-					player.direction.y = 0
+					player.direction.y = 3
 
 
 	def horizontal_movement_collision(self):
