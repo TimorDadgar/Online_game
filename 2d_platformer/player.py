@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
 		self.jump_speed = -16
 		self.available_jumps = 1
 		self.delta_jump = 0
+		self.has_collided = False
 
 	def get_input(self):
 		global delta_jump
@@ -40,5 +41,4 @@ class Player(pygame.sprite.Sprite):
 		self.direction.y = self.jump_speed
 
 	def update(self):
-		print(self.available_jumps)
 		self.get_input()

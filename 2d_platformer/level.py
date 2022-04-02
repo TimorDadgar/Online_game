@@ -10,6 +10,7 @@ class Level:
 		self.display_surface = surface
 		self.setup_level(level_data)
 		self.world_shift = 0
+		self.collide_list = []
 
 	def setup_level(self, layout):
 		self.tiles = pygame.sprite.Group()
@@ -45,18 +46,31 @@ class Level:
 	def vertical_movement_collision(self):
 		player = self.player.sprite
 		player.apply_gravity()
-
+		self.collide_list = []
 		for sprite in self.tiles.sprites():
+			self.collide_list.append(sprite.rect.colliderect(player.rect))
 			if sprite.rect.colliderect(player.rect):
 				if player.direction.y > 0:
 					player.rect.bottom = sprite.rect.top
 					player.direction.y = 0
 					# Player jump
-					player.available_jumps = 2
 					player.delta_jump = 0
+					player.available_jumps = 2
+					player.has_collided = True				
 				elif player.direction.y < 0:
 					player.rect.top = sprite.rect.bottom
 					player.direction.y = 3
+		print("collision list :", self.collide_list)
+
+			
+
+	def double_jump(self):
+		player = self.player.sprite
+		if not any(self.collide_list) and player.has_collided == True:
+			player.available_jumps = 1
+			player.has_collided = False
+			print(player.available_jumps)
+
 
 
 	def horizontal_movement_collision(self):
@@ -81,4 +95,5 @@ class Level:
 		self.player.update()
 		self.horizontal_movement_collision()
 		self.vertical_movement_collision()
+		self.double_jump()
 		self.player.draw(self.display_surface)
