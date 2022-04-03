@@ -7,7 +7,7 @@ class Dog(pygame.sprite.Sprite):
 		super().__init__()
 		self.import_character_assets()
 		self.frame_index = 0
-		self.animation_speed = 0.15
+		self.animation_speed = 0.05
 		self.image = self.animations['eat'][self.frame_index]
 
 		self.rect = self.image.get_rect(topleft = pos)
@@ -22,7 +22,6 @@ class Dog(pygame.sprite.Sprite):
 
 	def import_character_assets(self):
 		dog_path = '../graphics/dog/shiba.png'
-		x, y = 1, 1
 		# name of key values in dic is same as folders in character
 		self.animations = {'eat':[],'walk':[]}
 		for animation in self.animations.keys():
@@ -54,6 +53,9 @@ class Dog(pygame.sprite.Sprite):
 				self.status = 'walk'
 				print("walking")
 
+	def apply_gravity(self):
+		self.direction.y += self.gravity
+		self.rect.y += self.direction.y
 
 	def update(self, x_shift):
 		self.rect.x += x_shift
