@@ -9,8 +9,6 @@ class Player(pygame.sprite.Sprite):
 		self.animation_speed = 0.15
 		self.image = self.animations['idle'][self.frame_index]
 
-		# self.image = pygame.Surface((32,64))
-		# self.image.fill('red')
 		self.rect = self.image.get_rect(topleft = pos)
 		
 		# Player movement
@@ -23,17 +21,20 @@ class Player(pygame.sprite.Sprite):
 		self.can_double_jump = False
 		self.delta_jump = 0
 
+		# Player status
+		self.status = 'idle'
+
 	def import_character_assets(self):
 		character_path = '../graphics/character/'
 		# name of key values in dic is same as folders in character
-		self.animations = {'idle':[],'run':[],'fall':[]}
+		self.animations = {'jump':[],'idle':[],'run':[],'fall':[]}
 
 		for animation in self.animations.keys():
 			full_path = character_path + animation
 			self.animations[animation] = import_folder(full_path)
 
 	def animate(self):
-		animation = self.animations['run']
+		animation = self.animations[self.status]
 		# Loop over frame_index
 		self.frame_index += self.animation_speed
 		if self.frame_index >= len(animation):
@@ -55,6 +56,20 @@ class Player(pygame.sprite.Sprite):
 			self.delta_jump = pygame.time.get_ticks()
 			self.jump()
 
+
+	def get_status(self):
+		# figure out what player is doing
+		if self.direction.y < 0:
+			self.status = 'jump'
+		elif self.direction.y > 1:
+			self.status = 'fall'
+		else:
+			if self.direction.x != 0:
+				self.status = 'run'
+			else:
+				self.status = 'idle'
+
+
 	def apply_gravity(self):
 		self.direction.y += self.gravity
 		self.rect.y += self.direction.y
@@ -70,4 +85,5 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self):
 		self.get_input()
+		self.get_status()
 		self.animate()

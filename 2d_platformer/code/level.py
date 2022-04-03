@@ -2,6 +2,7 @@ import pygame
 from tiles import Tile
 from settings import tile_size, screen_width
 from player import Player
+from dog import Dog
 
 
 class Level:
@@ -15,6 +16,7 @@ class Level:
 	def setup_level(self, layout):
 		self.tiles = pygame.sprite.Group()
 		self.player = pygame.sprite.GroupSingle()
+		self.dog = pygame.sprite.GroupSingle()
 		# enumerate method gives the index
 		for row_index,row in enumerate(layout):
 			for col_index,cell in enumerate(row):
@@ -24,14 +26,18 @@ class Level:
 					tile = Tile((x,y),tile_size)
 					self.tiles.add(tile)
 				if cell == 'P':
-
 					player_sprite = Player((x,y))
 					self.player.add(player_sprite)
+				if cell == 'D':
+					dog_sprite = Dog((x,y))
+					self.dog.add(dog_sprite)
 
 	def scroll_x(self):
 		player = self.player.sprite
 		player_x = player.rect.centerx
 		direction_x = player.direction.x
+		dog = self.dog.sprite
+		dog_x = dog.rect.centerx
 
 		if player_x < screen_width / 4 and direction_x < 0:
 			self.world_shift = 8
@@ -42,6 +48,7 @@ class Level:
 		else:
 			self.world_shift = 0
 			player.speed = 8
+		
 
 	def vertical_movement_collision(self):
 		player = self.player.sprite
@@ -89,3 +96,6 @@ class Level:
 		self.horizontal_movement_collision()
 		self.vertical_movement_collision()
 		self.player.draw(self.display_surface)
+		# Level dog
+		self.dog.update(self.world_shift)
+		self.dog.draw(self.display_surface)
