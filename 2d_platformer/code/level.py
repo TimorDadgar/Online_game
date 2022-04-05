@@ -26,7 +26,7 @@ class Level:
 					tile = Tile((x,y),tile_size)
 					self.tiles.add(tile)
 				if cell == 'P':
-					player_sprite = Player((x,y))
+					player_sprite = Player((x,y), self.display_surface)
 					self.player.add(player_sprite)
 				if cell == 'D':
 					dog_sprite = Dog((x,y))
@@ -36,18 +36,16 @@ class Level:
 		player = self.player.sprite
 		player_x = player.rect.centerx
 		direction_x = player.direction.x
-		dog = self.dog.sprite
-		dog_x = dog.rect.centerx
 
 		if player_x < screen_width / 4 and direction_x < 0:
-			self.world_shift = 8
+			self.world_shift = player.max_speed
 			player.speed = 0
 		elif player_x > screen_width - (screen_width/4) and direction_x > 0:
-			self.world_shift = -8
+			self.world_shift = -player.max_speed
 			player.speed = 0
 		else:
 			self.world_shift = 0
-			player.speed = 8
+			player.speed = player.max_speed
 		
 
 	def vertical_movement_collision(self):
@@ -81,6 +79,7 @@ class Level:
 
 	def horizontal_movement_collision(self):
 		player = self.player.sprite
+		print(player.speed)
 		player.rect.x += player.direction.x * player.speed
 
 		for sprite in self.tiles.sprites():

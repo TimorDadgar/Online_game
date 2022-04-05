@@ -27,7 +27,6 @@ def import_spritesheet(path, count, row, width, height):
 	for x in range(count):
 		rect = pygame.Rect(width*x, row*height+y, width, height)
 		# sprite.blit(sprite_sheet, (0,0), (i*width+x,y,width,height))
-		print("x :", width*x,"y :", y)
 		surface_list.append(sprite_sheet.subsurface(rect))
 
 	return surface_list
