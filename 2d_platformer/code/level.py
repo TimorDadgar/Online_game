@@ -29,7 +29,7 @@ class Level:
 					player_sprite = Player((x,y), self.display_surface)
 					self.player.add(player_sprite)
 				if cell == 'D':
-					dog_sprite = Dog((x,y))
+					dog_sprite = Dog((x,y), self.display_surface)
 					self.dog.add(dog_sprite)
 
 	def scroll_x(self):
@@ -79,7 +79,6 @@ class Level:
 
 	def horizontal_movement_collision(self):
 		player = self.player.sprite
-		print(player.speed)
 		player.rect.x += player.direction.x * player.speed
 
 		for sprite in self.tiles.sprites():
@@ -101,6 +100,63 @@ class Level:
 			player.on_left = False
 		if player.on_right and (player.rect.right > self.current_x or player.direction.x <= 0):
 			player.on_right = False
+
+		
+	
+	def vertical_dog_collision(self):
+		doggo = self.dog.sprite
+		doggo.apply_gravity()
+		self.collide_list = []
+		for sprite in self.tiles.sprites():
+			self.collide_list.append(sprite.rect.colliderect(doggo.rect))
+			if sprite.rect.colliderect(doggo.rect):
+				if doggo.direction.y > 0:
+					doggo.rect.bottom = sprite.rect.top
+					doggo.direction.y = 0
+					# doggo jump
+					doggo.delta_jump = 0
+					doggo.can_jump = True
+					doggo.on_ground = True
+				elif doggo.direction.y < 0:
+					doggo.rect.top = sprite.rect.bottom
+					doggo.direction.y = 3
+					doggo.on_ceiling = True
+		
+
+		if doggo.on_ground and (doggo.direction.y < 0 or doggo.direction.y > 1):
+			doggo.on_ground = False
+			doggo.can_double_jump = True
+			doggo.can_jump = False
+		elif doggo.on_ceiling and doggo.direction.y > 0:
+			doggo.on_ceiling = False
+
+
+
+	def horizontal_dog_collision(self):
+		doggo = self.dog.sprite
+		if doggo.status == 'walk':
+			doggo.rect.x += doggo.direction.x * doggo.speed
+
+			for sprite in self.tiles.sprites():
+				if sprite.rect.colliderect(doggo.rect):
+					# Here is a possibility for improvement
+					# Where the collision is done by looking at the movement of the player
+					# In case of ex. a fireball hitting this won't be right
+					if doggo.direction.x < 0:
+						doggo.rect.left = sprite.rect.right
+						doggo.on_left = True
+						# X position of where collision occured
+						self.current_x = doggo.rect.left
+					elif doggo.direction.x > 0:
+						doggo.rect.right = sprite.rect.left
+						doggo.on_right = True
+						self.current_x = doggo.rect.right
+			
+			if doggo.on_left and (doggo.rect.left < self.current_x or doggo.direction.x >= 0):
+				doggo.on_left = False
+			if doggo.on_right and (doggo.rect.right > self.current_x or doggo.direction.x <= 0):
+				doggo.on_right = False
+
 	def run(self):
 		# Level tiles
 		self.tiles.update(self.world_shift)
@@ -113,4 +169,6 @@ class Level:
 		self.player.draw(self.display_surface)
 		# Level dog
 		self.dog.update(self.world_shift)
+		self.horizontal_dog_collision()
+		self.vertical_dog_collision()
 		self.dog.draw(self.display_surface)
